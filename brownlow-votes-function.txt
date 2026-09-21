@@ -1,0 +1,125 @@
+// Netlify serverless function: proxies AFL Brownlow vote data
+// Bypasses CORS restrictions by fetching server-side
+
+exports.handler = async (event) => {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json',
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
+
+  const round = event.queryStringParameters?.round;
+  const COMP_SEASON_ID = 'CD_S2026014';
+
+  // Try multiple data sources in order
+  const results = await Promise.allSettled([
+    tryAflApi(`/cfs/afl/brownlow/leaderboard?compSeasonId=${COMP_SEASON_ID}`),
+    tryAflApi(`/cfs/afl/brownlow/predictor?compSeasonId=${COMP_SEASON_ID}`),
+    tryAflApi(`/cfs/afl/seasonPoints?compSeasonId=${COMP_SEASON_ID}`),
+    tryAflTrackerPage(),
+  ]);
+
+  // Return the first successful result
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value?.ok) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(r.value),
+      };
+    }
+  }
+
+  // All failed — return stub so the client knows to retry
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({
+      ok: false,
+      error: 'No vote data available yet',
+      tries: results.map(r =>
+        r.status === 'fulfilled' ? r.value?.error : r.reason?.message
+      ),
+      timestamp: new Date().toISOString(),
+    }),
+  };
+};
+
+async function tryAflApi(path) {
+  const url = `https://api.afl.com.au${path}`;
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      Accept: 'application/json',
+    },
+    signal: AbortSignal.timeout(8000),
+  });
+
+  if (!res.ok) {
+    return { ok: false, error: `AFL API ${res.status}`, source: url };
+  }
+
+  const data = await res.json();
+  return { ok: true, source: 'afl-api', data, timestamp: new Date().toISOString() };
+}
+
+async function tryAflTrackerPage() {
+  try {
+    const res = await fetch('https://www.afl.com.au/brownlow-medal/live-tracker', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        Accept: 'text/html',
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!res.ok) {
+      return { ok: false, error: `Tracker page ${res.status}` };
+    }
+
+    const html = await res.text();
+
+    // Try to extract JSON data embedded in the page
+    const jsonMatch = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\});/);
+    if (jsonMatch) {
+      try {
+        const data = JSON.parse(jsonMatch[1]);
+        return { ok: true, source: 'tracker-embedded', data, timestamp: new Date().toISOString() };
+      } catch {}
+    }
+
+    // Try to find vote data in script tags
+    const scriptData = html.match(/"brownlow[^"]*"\s*:\s*(\[[\s\S]*?\])/);
+    if (scriptData) {
+      try {
+        const data = JSON.parse(scriptData[1]);
+        return { ok: true, source: 'tracker-script', data, timestamp: new Date().toISOString() };
+      } catch {}
+    }
+
+    // Check if the page has actual vote content (not just "No data")
+    const hasVotes = html.includes('votes-') || html.includes('vote-count') ||
+                     html.includes('player-vote') || html.includes('leaderboard-row');
+
+    if (hasVotes) {
+      // Return raw HTML snippet for client-side parsing
+      const bodyMatch = html.match(/<main[\s\S]*?<\/main>/i) ||
+                        html.match(/<div[^>]*id="[^"]*tracker[^"]*"[\s\S]*?<\/div>/i);
+      return {
+        ok: true,
+        source: 'tracker-html',
+        hasVotes: true,
+        html: bodyMatch ? bodyMatch[0].slice(0, 10000) : null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return { ok: false, error: 'Tracker page has no vote data yet', source: 'tracker-html' };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}

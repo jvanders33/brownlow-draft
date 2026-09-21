@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brownlow Draft Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  
+  :root {
+    --bg: #0a0a0f;
+    --card: rgba(20, 20, 30, 0.85);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #e8e8f0;
+    --muted: #8888a0;
+    --gold: #d4a853;
+    --gold-light: #f0d48a;
+    --gold-dark: #b08a30;
+    --accent: #d4a853;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --danger: #ef4444;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  
+  /* Hero section with background image */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: 
+      linear-gradient(180deg, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0.6) 40%, rgba(10,10,15,0.95) 100%),
+      url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=1200&q=80') center/cover no-repeat;
+  }
+  
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top center, rgba(212,168,83,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 800px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .header h1 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(212,168,83,0.3);
+  }
+  
+  .header .subtitle {
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow);
+  }
+  
+  .card h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .card h2 .icon {
+    font-size: 1.4rem;
+  }
+  
+  /* Status badge */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(20px);
+    font-size: 0.85rem;
+  }
+  
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .status-badge.open { background: rgba(74,222,128,0.15); color: var(--ok); }
+  .status-badge.closed { background: rgba(251,191,36,0.15); color: var(--warn); }
+  .status-badge.live { background: rgba(239,68,68,0.15); color: var(--danger); }
+  
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  
+  /* Inputs */
+  input[type="text"], input[type="number"], input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  
+  input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212,168,83,0.15);
+  }
+  
+  input::placeholder { color: var(--muted); }
+  
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    color: #0a0a0f;
+  }
+  
+  .btn-gold:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(212,168,83,0.3);
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  
+  .btn-outline:hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+  
+  .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+  
+  .btn-full { width: 100%; }
+  
+  /* Signup list */
+  .signup-list {
+    list-style: none;
+    margin: 12px 0;
+  }
+  
+  .signup-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .signup-list li .pick-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(212,168,83,0.15);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  
+  .signup-list li .name {
+    flex: 1;
+    font-weight: 500;
+  }
+  
+  .signup-list li .label-you {
+    font-size: 0.7rem;
+    color: var(--gold);
+    background: rgba(212,168,83,0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  
+  /* Draft area */
+  .draft-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+  }
+  
+  .draft-slot {
+    padding: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  
+  .draft-slot.picking {
+    border-color: var(--gold);
+    background: rgba(212,168,83,0.08);
+    animation: glow 2s infinite;
+  }
+  
+  .draft-slot.filled {
+    border-color: rgba(74,222,128,0.3);
+    background: rgba(74,222,128,0.05);
+  }
+  
+  .draft-slot.waiting {
+    opacity: 0.4;
+  }
+  
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212,168,83,0); }
+    50% { box-shadow: 0 0 12px 2px rgba(212,168,83,0.2); }
+  }
+  
+  .draft-slot .team-name {
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 2px;
+  }
+  
+  .draft-slot .pick-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Player list */
+  .player-list {
+    max-height: 240px;
+    overflow-y: auto;
+    margin: 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-dark) transparent;
+  }
+  
+  .player-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.1s;
+  }
+  
+  .player-item:hover { background: rgba(255,255,255,0.05); }
+  .player-item.selected { background: rgba(212,168,83,0.15); border: 1px solid var(--gold); }
+  
+  .player-item .club-tag {
+    font-size: 0.7rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  
+  /* Leaderboard */
+  .leaderboard-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    transition: all 0.3s;
+  }
+  
+  .leaderboard-row.top {
+    background: linear-gradient(90deg, rgba(212,168,83,0.1) 0%, transparent 100%);
+    border-color: rgba(212,168,83,0.2);
+  }
+  
+  .leaderboard-row .rank {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--gold);
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  
+  .leaderboard-row .rank.gold { color: #ffd700; }
+  .leaderboard-row .rank.silver { color: #c0c0c0; }
+  .leaderboard-row .rank.bronze { color: #cd7f32; }
+  
+  .leaderboard-row .info {
+    flex: 1;
+    margin-left: 12px;
+  }
+  
+  .leaderboard-row .name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .leaderboard-row .picks {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  
+  .leaderboard-row .total {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--gold-light);
+    min-width: 50px;
+    text-align: right;
+  }
+  
+  .leaderboard-row .delta {
+    font-size: 0.7rem;
+    color: var(--ok);
+    margin-left: 6px;
+  }
+  
+  /* Round selector */
+  .round-pills {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 4px 0;
+    scrollbar-width: none;
+  }
+  
+  .round-pills::-webkit-scrollbar { display: none; }
+  
+  .round-pill {
+    padding: 4px 10px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  
+  .round-pill.active {
+    background: rgba(212,168,83,0.15);
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+  
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow);
+    z-index: 100;
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  
+  /* Admin toggle */
+  .admin-area {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  
+  .admin-toggle {
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px;
+  }
+  
+  .admin-toggle:hover { color: var(--text); }
+  
+  /* Flex helpers */
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mb-2 { margin-bottom: 8px; }
+  .text-center { text-align: center; }
+  .text-sm { font-size: 0.85rem; }
+  .text-xs { font-size: 0.75rem; }
+  .text-muted { color: var(--muted); }
+  .hidden { display: none !important; }
+  .flex-1 { flex: 1; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  
+  /* Subtotals table */
+  .subtotals-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin-top: 8px;
+  }
+  
+  .subtotals-table th {
+    text-align: left;
+    padding: 6px 8px;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .subtotals-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+  
+  .subtotals-table .player-col { font-weight: 500; }
+  .subtotals-table .votes-col { 
+    text-align: right; 
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+  
+  /* Mobile */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 2rem; }
+    .card { padding: 16px; }
+    .draft-board { grid-template-columns: repeat(2, 1fr); }
+    .leaderboard-row .rank { font-size: 1.1rem; width: 32px; }
+    .leaderboard-row .total { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="header">
+      <h1>🏈 Brownlow Draft</h1>
+      <p class="subtitle">Pick your players. Watch the votes roll in.</p>
+    </div>
+    
+    <!-- Status bar -->
+    <div class="status-bar" id="status-bar">
+      <span id="status-badge" class="status-badge open"><span class="status-dot"></span> SIGNUPS OPEN</span>
+      <span id="countdown" class="text-muted text-sm"></span>
+    </div>
+    
+    <!-- Phase: Signup -->
+    <div id="phase-signup" class="card">
+      <h2><span class="icon">📋</span> Join the Draft</h2>
+      <div class="flex gap-2">
+        <input type="text" id="signup-name" placeholder="Your name" maxlength="20">
+        <button class="btn btn-gold" id="btn-signup">Join</button>
+      </div>
+      <ul class="signup-list" id="signup-list"></ul>
+      <p id="signup-count" class="text-xs text-muted mt-2"></p>
+      
+      <div class="admin-area">
+        <button class="admin-toggle" id="btn-admin-toggle">⚙️ Host Controls</button>
+        <div id="admin-panel" class="hidden mt-2">
+          <div class="flex gap-2 items-center mt-2">
+            <input type="datetime-local" id="cfg-deadline" style="flex:1">
+            <button class="btn btn-outline btn-sm" id="btn-set-deadline">Set Deadline</button>
+          </div>
+          <button class="btn btn-gold btn-full mt-2" id="btn-start-draft">🎲 Start Draft</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Phase: Draft -->
+    <div id="phase-draft" class="card hidden">
+      <h2><span class="icon">🎲</span> Draft in Progress</h2>
+      <p class="text-sm text-muted mb-2">
+        <span id="draft-turn-label"></span>
+      </p>
+      <div class="draft-board" id="draft-board"></div>
+      
+      <!-- Player picker -->
+      <div id="player-picker" class="mt-3">
+        <div class="flex gap-2 items-center mb-2">
+          <input type="text" id="player-search" placeholder="Search players..." style="flex:1">
+          <span class="text-xs text-muted" id="pick-counter"></span>
+        </div>
+        <div class="player-list" id="player-list"></div>
+        <button class="btn btn-gold btn-full mt-2" id="btn-draft-pick">Confirm Pick</button>
+      </div>
+      
+      <!-- Timer -->
+      <div id="draft-timer" class="text-center mt-2">
+        <span class="text-muted text-sm">Pick closes in </span>
+        <span id="pick-timer" style="font-weight:700;color:var(--gold-light)">1:30</span>
+      </div>
+    </div>
+    
+    <!-- Phase: Leaderboard -->
+    <div id="phase-leaderboard" class="card hidden">
+      <h2><span class="icon">🏆</span> Leaderboard</h2>
+      
+      <!-- Round filter -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="round-pills" id="round-pills"></div>
+        <button class="btn btn-outline btn-sm" id="btn-refresh-votes">🔄 Refresh</button>
+      </div>
+      
+      <div id="leaderboard"></div>
+      
+      <!-- Subtotals -->
+      <details class="mt-3">
+        <summary class="text-xs text-muted" style="cursor:pointer">Show player vote breakdown</summary>
+        <table class="subtotals-table" id="subtotals-table">
+          <thead>
+            <tr><th>Player</th><th style="text-align:right">Votes</th></tr>
+          </thead>
+          <tbody id="subtotals-body"></tbody>
+        </table>
+      </details>
+      
+      <div class="text-center mt-3 text-xs text-muted" id="vote-status"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+  
+  // ── State ──
+  const KEY = 'brownlow-draft-v3';
+  let state = load();
+  let selectedPlayer = null;
+  let myName = localStorage.getItem('brownlow-my-name') || '';
+  
+  function defaultState() {
+    return {
+      phase: 'signup', // signup | draft | leaderboard
+      signups: [],
+      draftOrder: [],
+      picks: {}, // { teamName: [player1, player2, ...] }
+      currentPick: 0,
+      pickDeadline: null,
+      draftStartTime: null,
+      votes: {}, // { roundKey: { playerName: voteCount } }
+      lastVoteFetch: null,
+      pollInterval: null,
+    };
+  }
+  
+  function load() {
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved) return { ...defaultState(), ...JSON.parse(saved) };
+    } catch {}
+    return defaultState();
+  }
+  
+  function save() {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+  
+  // ── Timing ──
+  const SIGNUP_DEADLINE = new Date('2026-09-22T18:00:00+10:00'); // 6pm AEST
+  const DRAFT_START = new Date('2026-09-22T18:15:00+10:00'); // 6:15pm
+  const PICK_DURATION = 90000; // 90s per pick
+  
+  function now() { return new Date(); }
+  
+  function timeUntil(target) {
+    return target - now();
+  }
+  
+  // ── Player Data (top Brownlow contenders 2026) ──
+  // ponytail: hardcoded list, could load from API
+  const PLAYERS = [
+    { name: 'Nick Daicos', club: 'COL', avg: 1.2 },
+    { name: 'Marcus Bontempelli', club: 'WB', avg: 1.1 },
+    { name: 'Patrick Cripps', club: 'CAR', avg: 1.0 },
+    { name: 'Lachie Neale', club: 'BL', avg: 0.9 },
+    { name: 'Zach Merrett', club: 'ESS', avg: 0.9 },
+    { name: 'Touk Miller', club: 'GC', avg: 0.8 },
+    { name: 'Andrew Brayshaw', club: 'FRE', avg: 0.8 },
+    { name: 'Caleb Serong', club: 'FRE', avg: 0.8 },
+    { name: 'Errol Gulden', club: 'SYD', avg: 0.7 },
+    { name: 'Tom Green', club: 'GWS', avg: 0.7 },
+    { name: 'Jordan Dawson', club: 'ADE', avg: 0.7 },
+    { name: 'Matt Rowell', club: 'GC', avg: 0.7 },
+    { name: 'Christian Petracca', club: 'MEL', avg: 0.6 },
+    { name: 'Clayton Oliver', club: 'MEL', avg: 0.6 },
+    { name: 'Sam Walsh', club: 'CAR', avg: 0.6 },
+    { name: 'Isaac Heeney', club: 'SYD', avg: 0.6 },
+    { name: 'Chad Warner', club: 'SYD', avg: 0.6 },
+    { name: 'Jason Horne-Francis', club: 'PTA', avg: 0.6 },
+    { name: 'Connor Rozee', club: 'PTA', avg: 0.5 },
+    { name: 'Tim English', club: 'WB', avg: 0.5 },
+    { name: 'Max Gawn', club: 'MEL', avg: 0.5 },
+    { name: 'Charlie Curnow', club: 'CAR', avg: 0.5 },
+    { name: 'Jeremy Cameron', club: 'GEE', avg: 0.5 },
+    { name: 'Harry McKay', club: 'CAR', avg: 0.5 },
+    { name: 'Shai Bolton', club: 'RIC', avg: 0.5 },
+    { name: 'Jack Steele', club: 'STK', avg: 0.5 },
+    { name: 'Noah Anderson', club: 'GC', avg: 0.5 },
+    { name: 'Josh Daicos', club: 'COL', avg: 0.4 },
+    { name: 'Darcy Moore', club: 'COL', avg: 0.4 },
+    { name: 'Callum Mills', club: 'SYD', avg: 0.4 },
+    { name: 'Daniel Rioli', club: 'GC', avg: 0.4 },
+    { name: 'Bailey Smith', club: 'GEE', avg: 0.4 },
+    { name: 'Will Ashcroft', club: 'BL', avg: 0.4 },
+    { name: 'Luke Jackson', club: 'FRE', avg: 0.4 },
+    { name: 'Nick Larkey', club: 'NTH', avg: 0.4 },
+    { name: 'Jai Newcombe', club: 'HAW', avg: 0.4 },
+    { name: 'James Sicily', club: 'HAW', avg: 0.3 },
+    { name: 'Harris Andrews', club: 'BL', avg: 0.3 },
+    { name: 'Jacob Weitering', club: 'CAR', avg: 0.3 },
+    { name: 'Tom Lynch', club: 'RIC', avg: 0.3 },
+  ].sort((a, b) => b.avg - a.avg);
+  
+  const DRAFTED = () => new Set(Object.values(state.picks).flat());
+  
+  // ── DOM refs ──
+  const $ = id => document.getElementById(id);
+  const signupName = $('signup-name');
+  const btnSignup = $('btn-signup');
+  const signupList = $('signup-list');
+  const signupCount = $('signup-count');
+  const statusBadge = $('status-badge');
+  const countdown = $('countdown');
+  const phaseSignup = $('phase-signup');
+  const phaseDraft = $('phase-draft');
+  const phaseLeaderboard = $('phase-leaderboard');
+  
+  // ── Toast ──
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+  
+  // ── Render ──
+  function render() {
+    renderSignup();
+    renderStatus();
+    
+    if (state.phase === 'signup') {
+      phaseSignup.classList.remove('hidden');
+      phaseDraft.classList.add('hidden');
+      phaseLeaderboard.classList.add('hidden');
+    } else if (state.phase === 'draft') {
+      phaseSignup.classList.add('hidden');
+      phaseDraft.classList.remove('hidden');
+      phaseLeaderboard.classList.add('hidden');
+      renderDraft();
+    } else {
+      phaseSignup.classList.add('hidden');
+      phaseDraft.classList.add('hidden');
+      phaseLeaderboard.classList.remove('hidden');
+      renderLeaderboard();
+    }
+  }
+  
+  function renderSignup() {
+    signupList.innerHTML = '';
+    state.signups.forEach((name, i) => {
+      const li = document.createElement('li');
+      const isMe = name === myName;
+      li.innerHTML = `
+        <span class="pick-num">${i + 1}</span>
+        <span class="name">${esc(name)}</span>
+        ${isMe ? '<span class="label-you">YOU</span>' : ''}
+        ${state.signups.length < 2 && isMe ? `<button class="btn btn-outline btn-sm" data-leave="${name}">✕</button>` : ''}
+      `;
+      signupList.appendChild(li);
+    });
+    signupCount.textContent = `${state.signups.length} of 12 players joined`;
+    
+    // Disable signup if already joined
+    if (myName && state.signups.includes(myName)) {
+      signupName.value = '';
+      signupName.placeholder = 'You\'re in!';
+      signupName.disabled = true;
+      btnSignup.disabled = true;
+      btnSignup.textContent = '✓ Joined';
+    }
+  }
+  
+  function renderStatus() {
+    const t = now();
+    const isHost = state.signups[0] === myName;
+    
+    if (state.phase === 'signup') {
+      const timeToDeadline = timeUntil(SIGNUP_DEADLINE);
+      const timeToDraft = timeUntil(DRAFT_START);
+      
+      if (timeToDeadline > 0) {
+        statusBadge.className = 'status-badge open';
+        statusBadge.innerHTML = '<span class="status-dot"></span> SIGNUPS OPEN';
+        countdown.textContent = 'Closes ' + formatCountdown(timeToDeadline);
+      } else if (timeToDraft > 0) {
+        statusBadge.className = 'status-badge closed';
+        statusBadge.innerHTML = '<span class="status-dot"></span> SIGNUPS CLOSED';
+        countdown.textContent = 'Draft starts ' + formatCountdown(timeToDraft);
+      } else if (state.signups.length >= 2) {
+        // Auto-start draft
+        state.phase = 'draft';
+        startDraft();
+      } else {
+        statusBadge.className = 'status-badge closed';
+        statusBadge.innerHTML = '<span class="status-dot"></span> NOT ENOUGH PLAYERS';
+        countdown.textContent = 'Need at least 2';
+      }
+    } else if (state.phase === 'draft') {
+      statusBadge.className = 'status-badge.live';
+      statusBadge.innerHTML = '<span class="status-dot"></span> DRAFT LIVE';
+      const team = currentTeam();
+      countdown.textContent = team ? `${team} is picking` : 'Draft complete';
+    } else {
+      statusBadge.className = 'status-badge.live';
+      statusBadge.innerHTML = '<span class="status-dot"></span> TRACKING VOTES';
+      if (state.lastVoteFetch) {
+        countdown.textContent = 'Updated ' + formatTime(new Date(state.lastVoteFetch));
+      }
+    }
+  }
+  
+  function renderDraft() {
+    const board = $('draft-board');
+    board.innerHTML = '';
+    
+    state.draftOrder.forEach((team, i) => {
+      const div = document.createElement('div');
+      const picks = state.picks[team] || [];
+      const isPicking = i === state.currentPick;
+      const isFilled = picks.length >= 4;
+      const isActive = isPicking && !isFilled;
+      
+      div.className = `draft-slot ${isActive ? 'picking' : isFilled ? 'filled' : 'waiting'}`;
+      div.innerHTML = `
+        <div class="team-name">${esc(team)}</div>
+        <div class="pick-label">${picks.length}/4 picks</div>
+        ${picks.length > 0 ? `<div class="text-xs text-muted mt-1">${picks.map(p => esc(p.split(' ').pop())).join(', ')}</div>` : ''}
+      `;
+      board.appendChild(div);
+    });
+    
+    // Update turn label
+    const team = currentTeam();
+    if (team) {
+      $('draft-turn-label').innerHTML = `<strong>${esc(team)}</strong>'s turn — pick a player`;
+      $('pick-counter').textContent = `${(state.picks[team] || []).length}/4`;
+    } else {
+      $('draft-turn-label').textContent = 'Draft complete!';
+      $('pick-counter').textContent = '';
+    }
+    
+    // Render available players
+    renderPlayerList();
+  }
+  
+  function renderPlayerList() {
+    const list = $('player-list');
+    const search = $('player-search').value.toLowerCase();
+    const drafted = DRAFTED();
+    const isMyTurn = currentTeam() === myName;
+    
+    list.innerHTML = '';
+    PLAYERS.filter(p => !drafted.has(p.name))
+      .filter(p => !search || p.name.toLowerCase().includes(search) || p.club.toLowerCase().includes(search))
+      .forEach(p => {
+        const div = document.createElement('div');
+        div.className = `player-item ${selectedPlayer === p.name ? 'selected' : ''}`;
+        div.innerHTML = `
+          <span>${esc(p.name)}</span>
+          <span class="club-tag">${esc(p.club)}</span>
+        `;
+        if (isMyTurn) {
+          div.onclick = () => { selectedPlayer = p.name; renderPlayerList(); };
+        }
+        list.appendChild(div);
+      });
+    
+    // Update button
+    const btn = $('btn-draft-pick');
+    btn.disabled = !isMyTurn || !selectedPlayer;
+    btn.textContent = isMyTurn ? 'Confirm Pick' : 'Waiting for ' + (currentTeam() || '...');
+  }
+  
+  function renderLeaderboard() {
+    const lb = $('leaderboard');
+    lb.innerHTML = '';
+    
+    const totals = getTotals();
+    const sorted = Object.entries(totals).sort((a, b) => b[1].total - a[1].total);
+    
+    if (sorted.length === 0) {
+      lb.innerHTML = '<p class="text-center text-muted text-sm">No votes recorded yet. Votes will appear during the count.</p>';
+      return;
+    }
+    
+    sorted.forEach(([name, data], i) => {
+      const div = document.createElement('div');
+      const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      div.className = `leaderboard-row ${i === 0 ? 'top' : ''}`;
+      div.innerHTML = `
+        <span class="rank ${rankClass}">${i + 1}</span>
+        <div class="info">
+          <div class="name">${esc(name)}</div>
+          <div class="picks">${(data.players || []).join(', ')}</div>
+        </div>
+        <span class="total">${data.total}</span>
+      `;
+      lb.appendChild(div);
+    });
+    
+    // Subtotals
+    renderSubtotals();
+  }
+  
+  function renderSubtotals() {
+    const body = $('subtotals-body');
+    body.innerHTML = '';
+    
+    const playerVotes = {};
+    Object.values(state.votes).forEach(roundVotes => {
+      Object.entries(roundVotes).forEach(([name, votes]) => {
+        playerVotes[name] = (playerVotes[name] || 0) + votes;
+      });
+    });
+    
+    const sorted = Object.entries(playerVotes).sort((a, b) => b[1] - a[1]);
+    sorted.forEach(([name, votes]) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="player-col">${esc(name)}</td><td class="votes-col">${votes}</td>`;
+      body.appendChild(tr);
+    });
+  }
+  
+  // ── Draft logic ──
+  function startDraft() {
+    if (state.signups.length < 2) {
+      toast('Need at least 2 players!');
+      return;
+    }
+    
+    // Shuffle signups for random draft order
+    const shuffled = [...state.signups];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    state.draftOrder = shuffled;
+    state.picks = {};
+    state.currentPick = 0;
+    state.phase = 'draft';
+    state.draftStartTime = Date.now();
+    state.pickDeadline = Date.now() + PICK_DURATION;
+    
+    // Start pick timer
+    startPickTimer();
+    
+    save();
+    render();
+    toast('Draft order shuffled! 🎲');
+  }
+  
+  function currentTeam() {
+    // Find the team that should pick next (snake draft: 1-2-3-4-4-3-2-1)
+    const n = state.draftOrder.length;
+    const pick = state.currentPick;
+    
+    // Each "round" is 2n picks (forward + back)
+    const round = Math.floor(pick / (n * 2));
+    const pos = pick % (n * 2);
+    const idx = pos < n ? pos : (2 * n - 1 - pos);
+    
+    const team = state.draftOrder[idx];
+    
+    // Check if team already has 4 picks
+    if ((state.picks[team] || []).length >= 4) {
+      // Skip to next
+      state.currentPick++;
+      save();
+      if (state.currentPick >= n * 4) return null; // Draft done
+      return currentTeam();
+    }
+    
+    return team;
+  }
+  
+  function makePick() {
+    const team = currentTeam();
+    if (!team || !selectedPlayer) return;
+    if (team !== myName) { toast('Not your turn!'); return; }
+    
+    if (!state.picks[team]) state.picks[team] = [];
+    state.picks[team].push(selectedPlayer);
+    
+    state.currentPick++;
+    selectedPlayer = null;
+    state.pickDeadline = Date.now() + PICK_DURATION;
+    
+    // Check if draft is done
+    const totalPicks = state.draftOrder.length * 4;
+    const made = Object.values(state.picks).flat().length;
+    
+    if (made >= totalPicks || state.currentPick >= state.draftOrder.length * 8) {
+      state.phase = 'leaderboard';
+      toast('Draft complete! 🏆');
+    }
+    
+    save();
+    render();
+    toast(`Picked ${state.picks[team][state.picks[team].length - 1]}!`);
+  }
+  
+  let pickTimerInterval = null;
+  
+  function startPickTimer() {
+    if (pickTimerInterval) clearInterval(pickTimerInterval);
+    pickTimerInterval = setInterval(() => {
+      if (state.phase !== 'draft') { clearInterval(pickTimerInterval); return; }
+      
+      const remaining = state.pickDeadline - Date.now();
+      const el = $('pick-timer');
+      
+      if (remaining <= 0) {
+        // Auto-pick best available
+        autoPick();
+        return;
+      }
+      
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      el.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+  
+  function autoPick() {
+    const team = currentTeam();
+    if (!team) return;
+    
+    const drafted = DRAFTED();
+    const best = PLAYERS.find(p => !drafted.has(p.name));
+    
+    if (best) {
+      if (!state.picks[team]) state.picks[team] = [];
+      state.picks[team].push(best.name);
+      state.currentPick++;
+      state.pickDeadline = Date.now() + PICK_DURATION;
+      
+      toast(`${team} auto-picked ${best.name} (time ran out)`);
+      
+      const totalPicks = state.draftOrder.length * 4;
+      const made = Object.values(state.picks).flat().length;
+      if (made >= totalPicks) {
+        state.phase = 'leaderboard';
+        toast('Draft complete! 🏆');
+      }
+      
+      save();
+      render();
+    }
+  }
+  
+  // ── Vote tracking ──
+  async function fetchVotes() {
+    const statusEl = $('vote-status');
+    statusEl.textContent = 'Fetching votes...';
+    
+    try {
+      // Try Netlify function first (bypasses CORS)
+      const res = await fetch('/api/brownlow-votes');
+      const data = await res.json();
+      
+      if (data.ok && data.data) {
+        parseAflData(data.data);
+        state.lastVoteFetch = Date.now();
+        statusEl.textContent = `✓ Updated from ${data.source} at ${formatTime(new Date())}`;
+      } else {
+        // Try Squiggle API as fallback
+        await trySquiggleApi();
+      }
+    } catch (e) {
+      console.log('Netlify function failed, trying Squiggle:', e);
+      await trySquiggleApi();
+    }
+    
+    save();
+    render();
+  }
+  
+  async function trySquiggleApi() {
+    const statusEl = $('vote-status');
+    try {
+      const res = await fetch('https://api.squiggle.com.au/?q=brownlow;year=2026', {
+        signal: AbortSignal.timeout(8000),
+      });
+      const text = await res.text();
+      
+      // Parse tab-separated data
+      const lines = text.split('\n').filter(l => l.trim());
+      const headers = lines[0].split('\t').map(h => h.trim().toLowerCase());
+      const votes = {};
+      
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split('\t');
+        const row = {};
+        headers.forEach((h, j) => row[h] = vals[j]?.trim());
+        
+        if (row.votes && row.player && row.round) {
+          const roundKey = `R${row.round}`;
+          if (!votes[roundKey]) votes[roundKey] = {};
+          votes[roundKey][row.player] = parseInt(row.votes) || 0;
+        }
+      }
+      
+      if (Object.keys(votes).length > 0) {
+        state.votes = votes;
+        state.lastVoteFetch = Date.now();
+        statusEl.textContent = `✓ Updated from Squiggle at ${formatTime(new Date())}`;
+      } else {
+        statusEl.textContent = `⚠ No vote data available yet (${formatTime(new Date())})`;
+      }
+    } catch (e) {
+      statusEl.textContent = `⚠ Couldn't fetch votes — will retry (${formatTime(new Date())})`;
+    }
+  }
+  
+  function parseAflData(data) {
+    // Handle various AFL API response formats
+    if (Array.isArray(data)) {
+      data.forEach(entry => {
+        const round = entry.roundNumber || entry.round || '';
+        const roundKey = `R${round}`;
+        if (!state.votes[roundKey]) state.votes[roundKey] = {};
+        
+        if (entry.players) {
+          entry.players.forEach(p => {
+            state.votes[roundKey][p.name || p.playerName] = p.votes || p.voteCount || 0;
+          });
+        }
+      });
+    } else if (data.votes || data.players) {
+      const votes = data.votes || data.players || [];
+      votes.forEach(p => {
+        const roundKey = `R${p.roundNumber || p.round || 1}`;
+        if (!state.votes[roundKey]) state.votes[roundKey] = {};
+        state.votes[roundKey][p.name || p.playerName] = p.votes || p.voteCount || 0;
+      });
+    }
+  }
+  
+  function getTotals() {
+    const totals = {};
+    
+    Object.entries(state.picks).forEach(([team, players]) => {
+      totals[team] = { total: 0, players, roundVotes: {} };
+      
+      players.forEach(player => {
+        let playerTotal = 0;
+        Object.entries(state.votes).forEach(([round, roundVotes]) => {
+          const v = roundVotes[player] || 0;
+          playerTotal += v;
+          if (!totals[team].roundVotes[round]) totals[team].roundVotes[round] = 0;
+          totals[team].roundVotes[round] += v;
+        });
+        totals[team].total += playerTotal;
+      });
+    });
+    
+    return totals;
+  }
+  
+  // ── Helpers ──
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  
+  function formatCountdown(ms) {
+    if (ms <= 0) return 'now';
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    if (h > 0) return `in ${h}h ${m}m`;
+    return `in ${m}m`;
+  }
+  
+  function formatTime(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  
+  // ── Events ──
+  btnSignup.onclick = () => {
+    const name = signupName.value.trim();
+    if (!name) return;
+    if (state.signups.includes(name)) { toast('Name taken!'); return; }
+    if (state.signups.length >= 12) { toast('Draft is full!'); return; }
+    
+    state.signups.push(name);
+    myName = name;
+    localStorage.setItem('brownlow-my-name', name);
+    signupName.value = '';
+    save();
+    render();
+    toast(`Welcome, ${name}! 🏈`);
+  };
+  
+  signupName.onkeydown = e => { if (e.key === 'Enter') btnSignup.click(); };
+  
+  signupList.onclick = e => {
+    const leave = e.target.closest('[data-leave]');
+    if (leave) {
+      const name = leave.dataset.leave;
+      state.signups = state.signups.filter(n => n !== name);
+      if (name === myName) { myName = ''; localStorage.removeItem('brownlow-my-name'); }
+      save();
+      render();
+    }
+  };
+  
+  $('btn-admin-toggle').onclick = () => {
+    $('admin-panel').classList.toggle('hidden');
+  };
+  
+  $('btn-start-draft').onclick = startDraft;
+  
+  $('player-search').oninput = renderPlayerList;
+  $('btn-draft-pick').onclick = makePick;
+  $('btn-refresh-votes').onclick = fetchVotes;
+  
+  // ── Auto-polling ──
+  function startPolling() {
+    // Poll every 30s during Brownlow night (6pm-midnight AEST on Sept 22)
+    const t = now();
+    const brownlowNight = t >= SIGNUP_DEADLINE && t <= new Date('2026-09-23T00:00:00+10:00');
+    
+    if (state.phase === 'leaderboard' && brownlowNight) {
+      fetchVotes();
+      state.pollInterval = setInterval(fetchVotes, 30000);
+    } else if (state.phase === 'leaderboard') {
+      // Outside Brownlow night, poll every 5 min
+      state.pollInterval = setInterval(fetchVotes, 300000);
+    }
+  }
+  
+  // ── Init ──
+  render();
+  startPolling();
+  
+  // Re-render every 30s for countdown updates
+  setInterval(render, 30000);
+})();
+</script>
+</body>
+</html>
