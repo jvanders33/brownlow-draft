@@ -1,0 +1,42 @@
+// Supabase-backed shared state for Brownlow Draft
+// ponytail: move to env vars if you ever need to rotate keys without redeploying
+
+const TABLE = 'drafts';
+const ROW_ID = 'main';
+const url = 'https://vsoielynwiezblsdofitz.supabase.co';
+const key = 'sb_publishable_y4wji3SDpEnDQwNkXhHhRg_zg49BnWA';
+
+exports.handler = async (event) => {
+  const base = `${url}/rest/v1/${TABLE}`;
+  const headers = {
+    'apikey': key,
+    'Authorization': `Bearer ${key}`,
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    if (event.httpMethod === 'GET') {
+      const res = await fetch(`${base}?id=eq.${ROW_ID}&select=state`, { headers });
+      const rows = await res.json();
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rows[0]?.state || null)
+      };
+    }
+
+    if (event.httpMethod === 'POST') {
+      const body = JSON.parse(event.body);
+      await fetch(base, {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ id: ROW_ID, state: body }),
+      });
+      return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: '{"ok":true}' };
+    }
+
+    return { statusCode: 405, body: 'Method not allowed' };
+  } catch (e) {
+    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
+  }
+};
